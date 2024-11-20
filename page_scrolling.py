@@ -25,7 +25,6 @@ def normalize_sample(sample):
     normalized_sample = (sample - mean_val) / std_val
     return normalized_sample
 
-
 # Load the pre-trained model
 model_file = "eye_classification_model.h5"
 model = tf.keras.models.load_model(model_file)
