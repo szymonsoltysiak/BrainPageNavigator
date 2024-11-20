@@ -10,6 +10,7 @@ It focuses on recognizing eye movement gestures using a **Convolutional Neural N
 - **Gaming & Virtual Reality:** Enabling immersive experiences.
 - **Healthcare Monitoring:** Tracking cognitive health through brain activity.
 
+
 ---
 
 ## Installation
