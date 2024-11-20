@@ -7,9 +7,8 @@ from tensorflow.keras.utils import to_categorical
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from tensorflow.keras.regularizers import l2
-
-
 import os
+
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 
@@ -18,6 +17,7 @@ def load_data(json_file):
     with open(json_file, 'r') as f:
         data = json.load(f)
     return data
+
 
 def normalize_sample(sample):
     sample = np.array(sample)
@@ -59,6 +59,7 @@ def preprocess_data(data):
 
     return X_normalized, y_one_hot, label_encoder
 
+
 # Update Model Input Shape
 def build_model(input_shape):
     model = tf.keras.Sequential([
@@ -67,7 +68,7 @@ def build_model(input_shape):
         tf.keras.layers.MaxPooling1D(pool_size=2),
         tf.keras.layers.Conv1D(filters=64, kernel_size=3, activation='relu'),
         tf.keras.layers.MaxPooling1D(pool_size=2),
-        
+
         # Flatten and Fully Connected Layers
         tf.keras.layers.Flatten(),
         tf.keras.layers.Dense(128, activation='relu', kernel_regularizer=l2(0.01)),
@@ -75,11 +76,12 @@ def build_model(input_shape):
         tf.keras.layers.Dense(64, activation='relu', kernel_regularizer=l2(0.01)),
         tf.keras.layers.Dense(3, activation='softmax')  # Output layer for 3 classes
     ])
-    
+
     model.compile(optimizer='adam',
                   loss='categorical_crossentropy',
                   metrics=['accuracy'])
     return model
+
 
 # Function to plot training history
 def plot_history(history):
@@ -106,13 +108,14 @@ def plot_history(history):
     plt.tight_layout()
     plt.show()
 
+
 def add_noise(X, noise_factor=0.05):
     std_devs = np.std(X, axis=1, keepdims=True)
-    
+
     std_devs = np.where(std_devs == 0, 1, std_devs)
-    
+
     noise = noise_factor * std_devs * np.random.randn(*X.shape)
-    
+
     return X + noise
 
 
@@ -129,7 +132,7 @@ if __name__ == "__main__":
     # Add noise for data augmentation
     X_augmented = add_noise(X_train)
     X_train = np.concatenate((X_train, X_augmented))  # Combine original and augmented data
-    y_train = np.concatenate((y_train, y_train))      # Duplicate labels for augmented data
+    y_train = np.concatenate((y_train, y_train))  # Duplicate labels for augmented data
 
     # Build the model
     input_shape = X_train.shape[1:]  # (500, 1)

@@ -6,12 +6,15 @@ import numpy as np
 import tensorflow as tf
 
 import os
+
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
 
 def get_one_channel_data(rawdata, channel_name="O2"):
     """Extracts a 500-sample segment from a specified EEG channel."""
     data = rawdata.get_data(picks=[channel_name])[0]  # Get data for the specific channel
-    return data[-500:]  
+    return data[-500:]
+
 
 def normalize_sample(sample):
     sample = np.array(sample)
@@ -24,6 +27,7 @@ def normalize_sample(sample):
 
     normalized_sample = (sample - mean_val) / std_val
     return normalized_sample
+
 
 # Load the pre-trained model
 model_file = "eye_classification_model.h5"
@@ -48,15 +52,16 @@ time.sleep(3)
 # Pobierz wysokość widoku
 viewport_height = driver.execute_script("return window.innerHeight")
 
+
 def smooth_scroll_to(target_position, duration=1):
     """Smoothly scroll to a target position with a gradual movement."""
     # Get the current scroll position
     current_position = driver.execute_script("return window.scrollY")
-    
+
     # Calculate the total number of steps (small scroll increments)
     steps = int(abs(target_position - current_position) // 10)
     step_size = (target_position - current_position) / steps
-    
+
     for step in range(steps):
         current_position += step_size
         driver.execute_script(f"window.scrollTo(0, {current_position});")
@@ -93,27 +98,26 @@ def scroll_up():
         print("Reached top of the page")
 
 
-
 # Connect to BrainAccess
 db, status = bb.db_connect()
 if status:
     board_control = BoardControl()
     response = board_control.get_commands()
 
-    board_control.command(response["data"]["stop_recording"])  
-    i=0
+    board_control.command(response["data"]["stop_recording"])
+    i = 0
     pred_classes = []
     while True:
-        if i==0:
-            board_control.command(response["data"]["start_recording"]) 
-        sleep(0.5)  
+        if i == 0:
+            board_control.command(response["data"]["start_recording"])
+        sleep(0.5)
         device = db.get_mne()
-        rawdata = device[next(iter(device))]  
+        rawdata = device[next(iter(device))]
         data = get_one_channel_data(rawdata)
         if len(data) < 500:
             print("Data length less than 500")
             continue
-        data_reshaped = data.reshape((1, data.shape[0], 1))  
+        data_reshaped = data.reshape((1, data.shape[0], 1))
         pred = model.predict(normalize_sample(data_reshaped))
         pred_class = np.argmax(pred)
         pred_classes.append(pred_class)
@@ -127,7 +131,7 @@ if status:
         else:
             pred_class = 2
 
-        if i%2 == 0:
+        if i % 2 == 0:
             if pred_class == 0:
                 print("eye_down")
                 scroll_down()
@@ -136,9 +140,8 @@ if status:
                 scroll_up()
             else:
                 print("none")
-        if i==0:
+        if i == 0:
             board_control.command(response["data"]["stop_recording"])
 
-        i+=1
-        i = i%100
-
+        i += 1
+        i = i % 100
